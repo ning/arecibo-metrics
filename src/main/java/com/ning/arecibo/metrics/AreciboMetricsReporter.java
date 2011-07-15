@@ -55,7 +55,7 @@ public class AreciboMetricsReporter implements Runnable {
      * @param unit   the time unit of {@code period}
      */
     public void start(long period, TimeUnit unit) {
-        TICK_THREAD.scheduleAtFixedRate(this, period, period, unit);
+        TICK_THREAD.scheduleAtFixedRate(this, 0, period, unit);
     }
 
     @Override
