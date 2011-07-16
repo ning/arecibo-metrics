@@ -123,21 +123,21 @@ public class AreciboMetricsReporter implements Runnable {
     
     private void registerGauge(GaugeMetric<?> metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
-        registerValue(name, "value", GaugeMBean.class);
+        registerValue(name, "Value", GaugeMBean.class);
     }
 
     private void registerCounter(CounterMetric metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
-        registerCounter(name, "count", CounterMBean.class);
+        registerCounter(name, "Count", CounterMBean.class);
     }
 
     private void registerHistogram(HistogramMetric metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
-        registerCounter(name, "count", HistogramMBean.class);
-        registerValue(name, "min", HistogramMBean.class);
-        registerValue(name, "max", HistogramMBean.class);
-        registerValue(name, "mean", HistogramMBean.class);
-        registerValue(name, "stdDev", HistogramMBean.class);
+        registerCounter(name, "Count", HistogramMBean.class);
+        registerValue(name, "Min", HistogramMBean.class);
+        registerValue(name, "Max", HistogramMBean.class);
+        registerValue(name, "Mean", HistogramMBean.class);
+        registerValue(name, "StdDev", HistogramMBean.class);
         registerValue(name, "50thPercentile", HistogramMBean.class);
         registerValue(name, "75thPercentile", HistogramMBean.class);
         registerValue(name, "95thPercentile", HistogramMBean.class);
@@ -148,29 +148,29 @@ public class AreciboMetricsReporter implements Runnable {
 
     private void registerMetered(MeterMetric metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
-        registerCounter(name, "count", MeterMBean.class);
-        registerValue(name, "meanRate", MeterMBean.class);
-        registerValue(name, "oneMinuteRate", MeterMBean.class);
-        registerValue(name, "fiveMinuteRate", MeterMBean.class);
-        registerValue(name, "fifteenMinuteRate", MeterMBean.class);
+        registerCounter(name, "Count", MeterMBean.class);
+        registerValue(name, "MeanRate", MeterMBean.class);
+        registerValue(name, "OneMinuteRate", MeterMBean.class);
+        registerValue(name, "FiveMinuteRate", MeterMBean.class);
+        registerValue(name, "FifteenMinuteRate", MeterMBean.class);
     }
 
     private void registerTimer(TimerMetric metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
-        registerCounter(name, "count", TimerMBean.class);
-        registerValue(name, "min", TimerMBean.class);
-        registerValue(name, "max", TimerMBean.class);
-        registerValue(name, "mean", TimerMBean.class);
-        registerValue(name, "stdDev", TimerMBean.class);
+        registerCounter(name, "Count", TimerMBean.class);
+        registerValue(name, "Min", TimerMBean.class);
+        registerValue(name, "Max", TimerMBean.class);
+        registerValue(name, "Mean", TimerMBean.class);
+        registerValue(name, "StdDev", TimerMBean.class);
         registerValue(name, "50thPercentile", TimerMBean.class);
         registerValue(name, "75thPercentile", TimerMBean.class);
         registerValue(name, "95thPercentile", TimerMBean.class);
         registerValue(name, "98thPercentile", TimerMBean.class);
         registerValue(name, "99thPercentile", TimerMBean.class);
         registerValue(name, "999thPercentile", TimerMBean.class);
-        registerValue(name, "meanRate", TimerMBean.class);
-        registerValue(name, "oneMinuteRate", TimerMBean.class);
-        registerValue(name, "fiveMinuteRate", TimerMBean.class);
-        registerValue(name, "fifteenMinuteRate", TimerMBean.class);
+        registerValue(name, "MeanRate", TimerMBean.class);
+        registerValue(name, "OneMinuteRate", TimerMBean.class);
+        registerValue(name, "FiveMinuteRate", TimerMBean.class);
+        registerValue(name, "FifteenMinuteRate", TimerMBean.class);
     }
 }
