@@ -23,18 +23,29 @@ import com.yammer.metrics.reporting.JmxReporter.TimerMBean;
 import com.yammer.metrics.util.Utils;
 
 public class AreciboMetricsReporter implements Runnable {
-    private static final ScheduledExecutorService TICK_THREAD = Utils.newScheduledThreadPool(1, "arecibo-reporter");
+    private static ScheduledExecutorService TICK_THREAD = Utils.newScheduledThreadPool(1, "arecibo-reporter");
 
     private final AreciboProfile profile;
 
     /**
-     * Enables the arecibo reporter.
+     * Enables the arecibo reporter. Note that this method is not thread safe.
      * 
      * @param profile The arecibo profile to keep up to date
      */
     public static AreciboMetricsReporter enable(AreciboProfile profile) {
         final AreciboMetricsReporter reporter = new AreciboMetricsReporter(profile);
 
+        if (TICK_THREAD != null) {
+            TICK_THREAD.shutdown();
+            try {
+                TICK_THREAD.awaitTermination(1, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
+        TICK_THREAD = Utils.newScheduledThreadPool(1, "arecibo-reporter");
         reporter.start(1, TimeUnit.MINUTES);
         return reporter;
     }
