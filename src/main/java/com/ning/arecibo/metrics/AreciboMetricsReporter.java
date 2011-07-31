@@ -8,6 +8,7 @@ import com.ning.arecibo.jmx.AreciboProfile;
 import com.ning.arecibo.jmx.Monitored;
 import com.ning.arecibo.jmx.MonitoringType;
 import com.yammer.metrics.Metrics;
+import com.yammer.metrics.MetricsRegistry;
 import com.yammer.metrics.core.CounterMetric;
 import com.yammer.metrics.core.GaugeMetric;
 import com.yammer.metrics.core.HistogramMetric;
@@ -20,32 +21,30 @@ import com.yammer.metrics.reporting.JmxReporter.GaugeMBean;
 import com.yammer.metrics.reporting.JmxReporter.HistogramMBean;
 import com.yammer.metrics.reporting.JmxReporter.MeterMBean;
 import com.yammer.metrics.reporting.JmxReporter.TimerMBean;
-import com.yammer.metrics.util.Utils;
 
 public class AreciboMetricsReporter implements Runnable {
-    private static ScheduledExecutorService TICK_THREAD = Utils.newScheduledThreadPool(1, "arecibo-reporter");
-
+    private final ScheduledExecutorService tickThread;
+    private final MetricsRegistry metricsRegistry;
     private final AreciboProfile profile;
 
     /**
      * Enables the arecibo reporter. Note that this method is not thread safe.
      * 
-     * @param profile The arecibo profile to keep up to date
+     * @param profile the arecibo profile to keep up to date
      */
     public static AreciboMetricsReporter enable(AreciboProfile profile) {
-        final AreciboMetricsReporter reporter = new AreciboMetricsReporter(profile);
+        return enable(Metrics.defaultRegistry(), profile);
+    }
 
-        if (TICK_THREAD != null) {
-            TICK_THREAD.shutdown();
-            try {
-                TICK_THREAD.awaitTermination(1, TimeUnit.SECONDS);
-            }
-            catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                return null;
-            }
-        }
-        TICK_THREAD = Utils.newScheduledThreadPool(1, "arecibo-reporter");
+    /**
+     * Enables the arecibo reporter. Note that this method is not thread safe.
+     * 
+     * @param metricsRegistry the metrics registry
+     * @param profile the arecibo profile to keep up to date
+     */
+    public static AreciboMetricsReporter enable(MetricsRegistry metricsRegistry, AreciboProfile profile) {
+        final AreciboMetricsReporter reporter = new AreciboMetricsReporter(metricsRegistry, profile);
+
         reporter.start(1, TimeUnit.MINUTES);
         return reporter;
     }
@@ -53,10 +52,12 @@ public class AreciboMetricsReporter implements Runnable {
     /**
      * Creates a new {@link AreciboMetricsReporter}.
      * 
-     * @param profile The arecibo profile to keep up to date
+     * @param profile the arecibo profile to keep up to date
      */
-    public AreciboMetricsReporter(AreciboProfile profile) {
+    public AreciboMetricsReporter(MetricsRegistry metricsRegistry, AreciboProfile profile) {
+        this.metricsRegistry = metricsRegistry;
         this.profile = profile;
+        this.tickThread = metricsRegistry.threadPools().newScheduledThreadPool(1, "arecibo-reporter");
     }
 
     /**
@@ -66,12 +67,12 @@ public class AreciboMetricsReporter implements Runnable {
      * @param unit   the time unit of {@code period}
      */
     public void start(long period, TimeUnit unit) {
-        TICK_THREAD.scheduleAtFixedRate(this, 0, period, unit);
+        tickThread.scheduleAtFixedRate(this, 0, period, unit);
     }
 
     @Override
     public void run() {
-        for (Map.Entry<MetricName, Metric> entry : Metrics.allMetrics().entrySet()) {
+        for (Map.Entry<MetricName, Metric> entry : metricsRegistry.allMetrics().entrySet()) {
             final MetricName name = entry.getKey();
             final Metric metric = entry.getValue();
     
