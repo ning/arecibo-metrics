@@ -4,7 +4,7 @@
   <groupId>com.ning.arecibo</groupId>
   <artifactId>arecibo-metrics</artifactId>
   <name>arecibo-metrics</name>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <description>Arecibo integration with the metrics library</description>
   <url>http://www.ning.com</url>
