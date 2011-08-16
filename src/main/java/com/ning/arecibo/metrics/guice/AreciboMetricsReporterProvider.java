@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.ning.arecibo.jmx.AreciboProfile;
 import com.ning.arecibo.metrics.AreciboMetricsReporter;
-import com.yammer.metrics.MetricsRegistry;
+import com.yammer.metrics.core.MetricsRegistry;
 
 public class AreciboMetricsReporterProvider implements Provider<AreciboMetricsReporter>
 {

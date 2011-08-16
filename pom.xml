@@ -45,12 +45,12 @@
     <dependency>
       <groupId>com.ning.arecibo</groupId>
       <artifactId>arecibo-jmx</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.yammer.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>2.0.0-BETA15-tomdz-201108081730</version>
+      <version>2.0.0-BETA15</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
