@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.ning.arecibo.jmx.AreciboMBeanExporter;
 import com.ning.arecibo.jmx.AreciboProfile;
 import com.ning.arecibo.jmx.Monitored;
 import com.ning.arecibo.jmx.MonitoringType;
@@ -26,10 +27,11 @@ public class AreciboMetricsReporter implements Runnable {
     private final ScheduledExecutorService tickThread;
     private final MetricsRegistry metricsRegistry;
     private final AreciboProfile profile;
+    private final AreciboMBeanExporter mbeanExporter;
 
     /**
      * Enables the arecibo reporter. Note that this method is not thread safe.
-     * 
+     *
      * @param profile the arecibo profile to keep up to date
      */
     public static AreciboMetricsReporter enable(AreciboProfile profile) {
@@ -38,7 +40,7 @@ public class AreciboMetricsReporter implements Runnable {
 
     /**
      * Enables the arecibo reporter. Note that this method is not thread safe.
-     * 
+     *
      * @param metricsRegistry the metrics registry
      * @param profile the arecibo profile to keep up to date
      */
@@ -52,11 +54,24 @@ public class AreciboMetricsReporter implements Runnable {
     /**
      * Creates a new {@link AreciboMetricsReporter}.
      * 
+     * @param metricsRegistry the metrics registry
      * @param profile the arecibo profile to keep up to date
      */
     public AreciboMetricsReporter(MetricsRegistry metricsRegistry, AreciboProfile profile) {
+        this(metricsRegistry, profile, null);
+    }
+
+    /**
+     * Creates a new {@link AreciboMetricsReporter}.
+     * 
+     * @param metricsRegistry the metrics registry
+     * @param profile the arecibo profile to keep up to date
+     * @param mbeanExporter the mbean exporter to use for not-recognized metrics
+     */
+    public AreciboMetricsReporter(MetricsRegistry metricsRegistry, AreciboProfile profile, AreciboMBeanExporter mbeanExporter) {
         this.metricsRegistry = metricsRegistry;
         this.profile = profile;
+        this.mbeanExporter = mbeanExporter;
         this.tickThread = metricsRegistry.threadPools().newScheduledThreadPool(1, "arecibo-reporter");
     }
 
@@ -80,14 +95,22 @@ public class AreciboMetricsReporter implements Runnable {
                 try {
                     if (metric instanceof GaugeMetric<?>) {
                         registerGauge((GaugeMetric<?>)metric, name);
-                    } else if (metric instanceof CounterMetric) {
+                    }
+                    else if (metric instanceof CounterMetric) {
                         registerCounter((CounterMetric)metric, name);
-                    } else if (metric instanceof HistogramMetric) {
+                    }
+                    else if (metric instanceof HistogramMetric) {
                         registerHistogram((HistogramMetric)metric, name);
-                    } else if (metric instanceof MeterMetric) {
+                    }
+                    else if (metric instanceof MeterMetric) {
                         registerMetered((MeterMetric)metric, name);
-                    } else if (metric instanceof TimerMetric) {
+                    }
+                    else if (metric instanceof TimerMetric) {
                         registerTimer((TimerMetric)metric, name);
+                    }
+                    else if (mbeanExporter != null) {
+                        // maybe it is annotated
+                        mbeanExporter.export(name.getMBeanName(), metric);
                     }
                 }
                 catch (Exception ignored) {
