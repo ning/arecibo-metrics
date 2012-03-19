@@ -9,14 +9,14 @@ import com.ning.arecibo.jmx.AreciboProfile;
 import com.ning.arecibo.jmx.Monitored;
 import com.ning.arecibo.jmx.MonitoringType;
 import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.CounterMetric;
-import com.yammer.metrics.core.GaugeMetric;
-import com.yammer.metrics.core.HistogramMetric;
-import com.yammer.metrics.core.MeterMetric;
+import com.yammer.metrics.core.Counter;
+import com.yammer.metrics.core.Gauge;
+import com.yammer.metrics.core.Histogram;
+import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.Metric;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.MetricsRegistry;
-import com.yammer.metrics.core.TimerMetric;
+import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.reporting.JmxReporter.CounterMBean;
 import com.yammer.metrics.reporting.JmxReporter.GaugeMBean;
 import com.yammer.metrics.reporting.JmxReporter.HistogramMBean;
@@ -72,7 +72,7 @@ public class AreciboMetricsReporter implements Runnable {
         this.metricsRegistry = metricsRegistry;
         this.profile = profile;
         this.mbeanExporter = mbeanExporter;
-        this.tickThread = metricsRegistry.threadPools().newScheduledThreadPool(1, "arecibo-reporter");
+        this.tickThread = metricsRegistry.newScheduledThreadPool(1, "arecibo-reporter");
     }
 
     /**
@@ -93,20 +93,20 @@ public class AreciboMetricsReporter implements Runnable {
     
             if (metric != null) {
                 try {
-                    if (metric instanceof GaugeMetric<?>) {
-                        registerGauge((GaugeMetric<?>)metric, name);
+                    if (metric instanceof Gauge<?>) {
+                        registerGauge((Gauge<?>)metric, name);
                     }
-                    else if (metric instanceof CounterMetric) {
-                        registerCounter((CounterMetric)metric, name);
+                    else if (metric instanceof Counter) {
+                        registerCounter((Counter)metric, name);
                     }
-                    else if (metric instanceof HistogramMetric) {
-                        registerHistogram((HistogramMetric)metric, name);
+                    else if (metric instanceof Histogram) {
+                        registerHistogram((Histogram)metric, name);
                     }
-                    else if (metric instanceof MeterMetric) {
-                        registerMetered((MeterMetric)metric, name);
+                    else if (metric instanceof Meter) {
+                        registerMetered((Meter)metric, name);
                     }
-                    else if (metric instanceof TimerMetric) {
-                        registerTimer((TimerMetric)metric, name);
+                    else if (metric instanceof Timer) {
+                        registerTimer((Timer)metric, name);
                     }
                     else if (mbeanExporter != null) {
                         // maybe it is annotated
@@ -156,17 +156,17 @@ public class AreciboMetricsReporter implements Runnable {
                     type);
     }
     
-    private void registerGauge(GaugeMetric<?> metric, MetricName name) {
+    private void registerGauge(Gauge<?> metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
         registerValue(name, "Value", GaugeMBean.class);
     }
 
-    private void registerCounter(CounterMetric metric, MetricName name) {
+    private void registerCounter(Counter metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
         registerCounter(name, "Count", CounterMBean.class);
     }
 
-    private void registerHistogram(HistogramMetric metric, MetricName name) {
+    private void registerHistogram(Histogram metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
         registerCounter(name, "Count", HistogramMBean.class);
         registerValue(name, "Min", HistogramMBean.class);
@@ -181,7 +181,7 @@ public class AreciboMetricsReporter implements Runnable {
         registerValue(name, "999thPercentile", HistogramMBean.class);
     }
 
-    private void registerMetered(MeterMetric metric, MetricName name) {
+    private void registerMetered(Meter metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
         registerCounter(name, "Count", MeterMBean.class);
         registerValue(name, "MeanRate", MeterMBean.class);
@@ -190,7 +190,7 @@ public class AreciboMetricsReporter implements Runnable {
         registerValue(name, "FifteenMinuteRate", MeterMBean.class);
     }
 
-    private void registerTimer(TimerMetric metric, MetricName name) {
+    private void registerTimer(Timer metric, MetricName name) {
         profile.register(name.getMBeanName(), metric);
         registerCounter(name, "Count", TimerMBean.class);
         registerValue(name, "Min", TimerMBean.class);
